@@ -44,7 +44,7 @@ public class World implements Updateable, EntityRenderable {
      * Constructs a new physics world with the gravity applied
      * @param gravity The gravity of the world
      */
-    public World(State state, Vector2f gravity) {
+    public World(Vector2f gravity) {
         this.gravity = gravity;
         bodies = new Vector<>();
         pairs = new Vector<>();
