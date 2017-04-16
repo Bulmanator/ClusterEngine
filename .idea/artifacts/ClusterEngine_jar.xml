@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact name="ClusterEngine:jar">
+    <output-path>$PROJECT_DIR$/Release/</output-path>
+    <root id="root">
+      <element id="archive" name="ClusterEngine.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/Release/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="ClusterEngine" />
+      </element>
+      <element id="library" level="project" name="JSFML" />
+    </root>
+  </artifact>
+</component>
