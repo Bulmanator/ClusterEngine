@@ -1,3 +1,27 @@
+/*
+    MIT License
+
+    Copyright (c) 2017 James Bulman
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
 package com.cluster.engine.Utilities.State;
 
 import com.cluster.engine.Game;
@@ -26,17 +50,16 @@ public abstract class State implements Renderable, Updateable, Disposable {
     /** The View used for moving the Camera */
     protected View view;
 
+    protected Vector2f worldSize;
+
     /** A Vector2 used for converting mouse coordinates from screen to world */
     protected Vector2i mouse;
-
-    public static final Vector2f WORLD_SIZE = new Vector2f(1920, 1080);
-
 
     /**
      * Creates a new State
      * @param gsm The {@link GameStateManager} which this State belongs to
      */
-    public State(GameStateManager gsm) {
+    public State(GameStateManager gsm, Vector2f worldSize) {
 
         // Sets the game to the Game instance in the Game State Manager
         game = gsm.game;
@@ -46,10 +69,10 @@ public abstract class State implements Renderable, Updateable, Disposable {
         // Gets the Window from the Game
         window = game.getWindow();
 
-        // Creates a new View and applies it
-        view = new View(new Vector2f(0, 0), WORLD_SIZE);
-        view.move(WORLD_SIZE.x/2, WORLD_SIZE.y/2);
+        this.worldSize = worldSize;
 
+        // Creates a new View and applies it
+        view = new View(new Vector2f(worldSize.x / 2f, worldSize.y / 2f), worldSize);
 
         // Initialises the Vector to 0, 0
         mouse = new Vector2i(0, 0);

@@ -1,13 +1,32 @@
+/*
+    MIT License
+
+    Copyright (c) 2017 James Bulman
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+*/
+
 package com.cluster.engine.Physics;
 
-import com.cluster.engine.Utilities.Interfaces.Typeable;
 import com.cluster.engine.Utilities.Interfaces.Updateable;
 import com.cluster.engine.Utilities.MathUtil;
 import org.jsfml.system.Vector2f;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Represents a physics body within the world
@@ -40,7 +59,6 @@ public class RigidBody implements Updateable {
 
     // Others
     private boolean alive;
-    private Typeable data;
 
     // The world the body is contained in
     private World world;
@@ -73,8 +91,7 @@ public class RigidBody implements Updateable {
         force = Vector2f.ZERO;
         torque = 0;
 
-        data = null;
-        alive = false;
+        alive = true;
 
         mask = config.mask;
         category = config.category;
@@ -243,12 +260,6 @@ public class RigidBody implements Updateable {
     public int getCategory() { return category; }
 
     /**
-     * Gets the data attached to the body, this can be anything
-     * @return The data of the body
-     */
-    public Typeable getData() { return data; }
-
-    /**
      * Gets the world the body is contained within
      * @return The world
      */
@@ -301,17 +312,6 @@ public class RigidBody implements Updateable {
      * @param alive True to set the body to alive, false for not alive
      */
     public void setAlive(boolean alive) {
-        if(data == null) return;
         this.alive = alive;
     }
-
-    /**
-     * Sets the data to the supplied object
-     * @param data The object to set the data to
-     */
-    public void setData(Typeable data) {
-        this.data = data;
-        if(data != null) alive = true;
-    }
-
 }
