@@ -11,7 +11,7 @@ This is a small engine built upon JSFML and was created as part of my university
     * PS3 (where drivers permit), PS4
 - Physics System
     * Rigid body collision detection and resolution
-    * Support for irregular concave polygons (SAT detection)
+    * Support for irregular convex polygons (SAT detection)
 - Utilities
     * Name based content manager 
       * Textures, Fonts, Sounds and Music
@@ -28,6 +28,7 @@ This is a small engine built upon JSFML and was created as part of my university
     * Circle-Polygon Collisions
     * Clipping and contact points
     * An actual broad-phase
+    * Multiple fixtures per rigid body
 - Messaging System
     * Broadcast
     * Observer-Listener
@@ -44,7 +45,7 @@ This is a small engine built upon JSFML and was created as part of my university
 - Code samples and Wiki
 
 #### Usage
-To use the engine, download the latest release from the Releases tab (Current Version: v1.0.0). 
+To use the engine, download the latest release from the Releases tab (not yet released). 
 Add both the ClusterEngine.jar and the jsfml.jar to the classpath or to your project if you are using an IDE. 
 The documentation can also be found in Releases tab.
  
