@@ -60,7 +60,7 @@ public final class MathUtil {
     /**
      * How many indexes the sin table will have
       */
-    private static final int sinTableSize = 360;
+    private static final int sinTableSize = 720;
 
     /**
      * The sin table holding all values
@@ -102,7 +102,7 @@ public final class MathUtil {
      * @return The sine of the angle
      */
     public static float sin(float radians) {
-        int angleIndex = (int)(radians * RAD_TO_DEG % sinTableSize);
+        int angleIndex = (int)((radians * RAD_TO_DEG * (sinTableSize/360)) % sinTableSize);
         return  sinTable[angleIndex];
     }
 
