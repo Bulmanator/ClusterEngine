@@ -57,7 +57,26 @@ public final class MathUtil {
      * Used to convert angles from Radians to Degrees
      */
     public static final float RAD_TO_DEG = 180f / PI;
+    /**
+     * How many indexes the sin table will have
+      */
+    private static final int sinTableSize = 360;
 
+    /**
+     * The sin table holding all values
+     */
+    private static final float[] sinTable = new float[sinTableSize];
+    
+    /**
+     * Generates the values for the sinTable
+     */
+    static {
+        float rads = 0;
+        for(int i = 0; i < sinTableSize; i++) {
+            sinTable[i] = (float)Math.sin(rads);
+            rads += PI2 / sinTableSize;
+        }
+    }
     // Private constructor to prevent instantiation
     private MathUtil() {}
 
@@ -69,18 +88,23 @@ public final class MathUtil {
     public static float square(float number) { return number * number; }
 
     /**
-     * A floating point conversion for {@link Math#cos(double)}
+     * A floating point cosine function that uses the sin lookup tables and offsets to become cos
      * @param radians The angle, in radians
      * @return The cosine of the angle
      */
-    public static float cos(float radians) { return (float)Math.cos(radians); }
+    public static float cos(float radians) {
+        return sin(radians + PI2 + PI/2);
+    }
 
     /**
-     * A floating point conversion for {@link Math#sin(double)}
+     * A floating point sin function that uses sin lookup tables generated at the top of the class
      * @param radians The angle, in radians
      * @return The sine of the angle
      */
-    public static float sin(float radians) { return (float)Math.sin(radians); }
+    public static float sin(float radians) {
+        int angleIndex = (int)(radians * RAD_TO_DEG % sinTableSize);
+        return  sinTable[angleIndex];
+    }
 
     /**
      * Generates a random integer between the values specified, [min, max)
