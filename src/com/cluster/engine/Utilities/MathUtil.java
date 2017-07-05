@@ -67,16 +67,6 @@ public final class MathUtil {
      */
     private static final float[] sinTable = new float[sinTableSize];
     
-    /**
-     * Generates the values for the sinTable
-     */
-    static {
-        float rads = 0;
-        for(int i = 0; i < sinTableSize; i++) {
-            sinTable[i] = (float)Math.sin(rads);
-            rads += PI2 / sinTableSize;
-        }
-    }
     // Private constructor to prevent instantiation
     private MathUtil() {}
 
@@ -93,7 +83,7 @@ public final class MathUtil {
      * @return The cosine of the angle
      */
     public static float cos(float radians) {
-        return sin(radians + PI2 + PI/2);
+        return sin(radians + PI/2);
     }
 
     /**
@@ -103,6 +93,10 @@ public final class MathUtil {
      */
     public static float sin(float radians) {
         int angleIndex = (int)((radians * RAD_TO_DEG * (sinTableSize/360)) % sinTableSize);
+        if(sinTable[angleIndex] == 0 && angleIndex!=0)
+        {
+            sinTable[angleIndex] = (float)Math.sin(radians);
+        }
         return  sinTable[angleIndex];
     }
 
