@@ -24,8 +24,10 @@
 
 package com.cluster.engine.Physics;
 
+import com.cluster.engine.Physics.Shapes.Polygon;
 import com.cluster.engine.Utilities.Interfaces.Updateable;
-import com.cluster.engine.Utilities.MathUtil;
+import com.cluster.engine.Utilities.MUtil;
+import com.cluster.engine.Utilities.VUtil;
 import org.jsfml.system.Vector2f;
 
 /**
@@ -34,20 +36,18 @@ import org.jsfml.system.Vector2f;
  */
 public class RigidBody implements Updateable {
 
+    // TODO(James): Allowing multiple shapes/ fixtures per body
+    static final int MAX_FIXTURES = 4;
+
     // Positional
     private Polygon shape;
     private Transform transform;
 
     // Material
-    private float density;
-    private float restitution;
+    private Material material;
 
-    // Mass Data
-    private float mass;
-    private float invMass;
-
-    private float inertia;
-    private float invInertia;
+    // MassData
+    private MassData massData;
 
     // Movement
     private Vector2f velocity;
@@ -66,6 +66,7 @@ public class RigidBody implements Updateable {
     // Collision Data
     private int mask;
     private int category;
+    private boolean isStatic;
 
     /**
      * Creates a new rigid body from the config given
@@ -79,14 +80,38 @@ public class RigidBody implements Updateable {
         transform = new Transform();
         transform.setPosition(config.position);
 
-        density = config.density;
-        restitution = config.restitution;
+        isStatic = config.isStatic;
+        if(isStatic) {
+            material = new Material(config.restitution, 0,
+                    config.dynamicFriction, config.staticFriction);
 
-        velocity = config.velocity;
-        angularVelocity = config.angularVelocity;
+            velocity = new Vector2f(0, 0);
+            angularVelocity = 0;
+        }
+        else {
+            material = new Material(config.restitution, config.density,
+                    config.dynamicFriction, config.staticFriction);
+
+            velocity = config.velocity;
+            angularVelocity = config.angularVelocity;
+        }
 
         shape = config.shape;
-        shape.initialise(this);
+
+        // TODO(James): Make this more robust and support circles
+        Vector2f[] vertices = shape.getVertices();
+        int vertexCount = shape.getVertexCount();
+
+        float area = 0;
+
+        for(int i = 0, j = vertexCount - 1; i < vertexCount; j = i++) {
+            area += VUtil.cross(vertices[i], vertices[j]);
+        }
+
+        float radius = shape.getRadius();
+
+        massData = new MassData(material.density * Math.abs(0.5f * area),
+                (MUtil.PI / 2f) * (float) Math.pow(radius, 4));
 
         force = Vector2f.ZERO;
         torque = 0;
@@ -108,12 +133,12 @@ public class RigidBody implements Updateable {
 
         float dth = dt * 0.5f;
 
-        Vector2f acceleration = Vector2f.mul(force, invMass);
+        Vector2f acceleration = Vector2f.mul(force, massData.invMass);
 
         Vector2f dv = new Vector2f(acceleration.x * dth, acceleration.y * dth);
         velocity = Vector2f.add(velocity, dv);
 
-        float omega = torque * invInertia;
+        float omega = torque * massData.invInertia;
         angularVelocity += (omega * dt);
 
         Vector2f dx = new Vector2f(velocity.x * dt, velocity.y * dt);
@@ -131,7 +156,6 @@ public class RigidBody implements Updateable {
     public void resetForces() {
         force = Vector2f.ZERO;
         torque = 0;
-        shape.reset();
     }
 
     /**
@@ -147,7 +171,7 @@ public class RigidBody implements Updateable {
      * @param impulse The impulse to apply
      */
     public void applyImpulse(Vector2f impulse) {
-        velocity = Vector2f.add(velocity, new Vector2f(impulse.x * invMass, impulse.y * invMass));
+        velocity = Vector2f.add(velocity, new Vector2f(impulse.x * massData.invMass, impulse.y * massData.invMass));
     }
 
     /**
@@ -161,24 +185,11 @@ public class RigidBody implements Updateable {
     }
 
     /**
-     * Takes the current resultant speed of the body and rotates it by the given angle
-     * @param angle the angle to rotate the velocity by
-     */
-    public void rotateVelocity(float angle) {
-        float x, y, total;
-
-        total = (float)Math.sqrt(MathUtil.lengthSq(velocity));
-        x = total * (float)Math.cos(angle - MathUtil.PI / 2);
-        y = total * (float)Math.sin(angle - MathUtil.PI / 2);
-        velocity = new Vector2f(x, y);
-    }
-
-    /**
      * Will return the speed of the body
      * @return the resultant speed of the body
      */
     public float getSpeed(){
-        return (float)Math.sqrt(MathUtil.lengthSq(velocity));
+        return (float)Math.sqrt(VUtil.lengthSq(velocity));
     }
 
     /**
@@ -206,40 +217,16 @@ public class RigidBody implements Updateable {
     public float getAngularVelocity() { return angularVelocity; }
 
     /**
-     * Gets the density of the body
-     * @return The density
+     * Gets the material properties of the body
+     * @return The material properties
      */
-    public float getDensity() { return density; }
+    public Material getMaterial() { return material; }
 
     /**
-     * Gets the the restitution of the body
-     * @return How bouncy the body is
+     * Gets the mass data of the body
+     * @return The mass data
      */
-    public float getRestitution() { return restitution; }
-
-    /**
-     * Gets the mass of the body
-     * @return The mass
-     */
-    public float getMass() { return mass; }
-
-    /**
-     * Gets the reciprocal of the mass
-     * @return 1 / {@link #getMass()}
-     */
-    public float getInvMass() { return invMass; }
-
-    /**
-     * Gets the inertia of the body
-     * @return The inertia
-     */
-    public float getInertia() { return inertia; }
-
-    /**
-     * Gets the reciprocal of the inertia
-     * @return 1 / {@link #getInertia()}
-     */
-    public float getInvInertia() { return invInertia; }
+    public MassData getMassData() { return massData; }
 
     /**
      * Whether or not the body is alive
@@ -264,36 +251,6 @@ public class RigidBody implements Updateable {
      * @return The world
      */
     public World getWorld() { return world; }
-
-    /**
-     * Sets the mass of the body to the value specified
-     * @param mass The new mass to set
-     */
-    void setMass(float mass) {
-        this.mass = mass;
-
-        if(mass != 0) {
-            invMass = 1f / mass;
-        }
-        else  {
-            invMass = 0;
-        }
-    }
-
-    /**
-     * Sets the inertia to the value specified
-     * @param inertia The new inertia to set
-     */
-    void setInertia(float inertia) {
-        this.inertia = inertia;
-
-        if(inertia != 0) {
-            invInertia = 1f / inertia;
-        }
-        else {
-            invInertia = 0;
-        }
-    }
 
     /**
      * Sets the linear velocity of the body

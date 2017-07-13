@@ -31,7 +31,6 @@ import com.cluster.engine.Utilities.Interfaces.Updateable;
 import org.jsfml.graphics.RenderWindow;
 import org.jsfml.graphics.View;
 import org.jsfml.system.Vector2f;
-import org.jsfml.system.Vector2i;
 
 /**
  * The base for a State to be used within the {@link GameStateManager}
@@ -52,14 +51,14 @@ public abstract class State implements Renderable, Updateable, Disposable {
 
     protected Vector2f worldSize;
 
-    /** A Vector2 used for converting mouse coordinates from screen to world */
-    protected Vector2i mouse;
+    /** A VectorUtil used for converting mouse coordinates from screen to world */
+    protected Vector2f mouse;
 
     /**
      * Creates a new State
      * @param gsm The {@link GameStateManager} which this State belongs to
      */
-    public State(GameStateManager gsm, Vector2f worldSize) {
+    public State(GameStateManager gsm) {
 
         // Sets the game to the Game instance in the Game State Manager
         game = gsm.game;
@@ -69,13 +68,13 @@ public abstract class State implements Renderable, Updateable, Disposable {
         // Gets the Window from the Game
         window = game.getWindow();
 
-        this.worldSize = worldSize;
+        worldSize = new Vector2f(window.getSize());
 
         // Creates a new View and applies it
         view = new View(new Vector2f(worldSize.x / 2f, worldSize.y / 2f), worldSize);
 
         // Initialises the Vector to 0, 0
-        mouse = new Vector2i(0, 0);
+        mouse = new Vector2f(0, 0);
         window.setView(view);
     }
 

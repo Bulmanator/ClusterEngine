@@ -37,7 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 /**
- * A Well-defined location for all content to be loaded into, this prevents extra memory from being used when using content
+ * a Well-defined location for all content to be loaded into, this prevents extra memory from being used when using content
  * @author James Bulman
  */
 public final class ContentManager {
@@ -149,7 +149,7 @@ public final class ContentManager {
         // Makes sure a duplicate name has not been user
         // Stops loading if it has
         if(textures.containsKey(name)) {
-            System.err.println("Warning: A Texture with the name \"" + name + "\" has already been loaded");
+            System.err.println("Warning: a Texture with the name \"" + name + "\" has already been loaded");
             return textures.get(name);
         }
 
@@ -182,7 +182,7 @@ public final class ContentManager {
         // Makes sure a duplicate name has not been used
         // Stops loading if it has
         if(fonts.containsKey(name)) {
-            System.err.println("Warning: A Font with the name \"" + name + "\" has already been loaded");
+            System.err.println("Warning: a Font with the name \"" + name + "\" has already been loaded");
             return fonts.get(name);
         }
 
@@ -215,7 +215,7 @@ public final class ContentManager {
         // Makes sure a duplicate name has not been used
         // Stops loading if it has
         if(sounds.containsKey(name)) {
-            System.err.println("Warning: A Sound with the name \"" + name + "\" has already been loaded");
+            System.err.println("Warning: a Sound with the name \"" + name + "\" has already been loaded");
             return sounds.get(name);
         }
 
@@ -282,7 +282,7 @@ public final class ContentManager {
      */
     public void unloadTexture(String name) {
         if(!textures.containsKey(name)) {
-            System.err.println("Warning: A Texture with the name \"" + name + "\" was not loaded");
+            System.err.println("Warning: a Texture with the name \"" + name + "\" was not loaded");
             return;
         }
 
@@ -295,7 +295,7 @@ public final class ContentManager {
      */
     public void unloadFont(String name) {
         if(!fonts.containsKey(name)) {
-            System.err.println("Warning: A Font with the name \"" + name + "\" was not loaded");
+            System.err.println("Warning: a Font with the name \"" + name + "\" was not loaded");
             return;
         }
 
@@ -308,7 +308,7 @@ public final class ContentManager {
      */
     public void unloadSound(String name) {
         if(!sounds.containsKey(name)) {
-            System.err.println("Warning: A Sound with the name \"" + name + "\" was not loaded");
+            System.err.println("Warning: a Sound with the name \"" + name + "\" was not loaded");
             return;
         }
 
@@ -333,7 +333,7 @@ public final class ContentManager {
      * @param volume The sound volume, between 0 and 100
      */
     public void setGlobalSFXVolume(float volume) {
-        volume = MathUtil.clamp(volume, 0, 100);
+        volume = MUtil.clamp(volume, 0, 100);
         Collection<Sound> sounds = this.sounds.values();
         for(Sound sound : sounds) {
             sound.setVolume(volume);
@@ -346,7 +346,7 @@ public final class ContentManager {
      * @param volume The music volume, between 0 and 100
      */
     public void setGlobalMusicVolume(float volume) {
-        volume = MathUtil.clamp(volume, 0, 100);
+        volume = MUtil.clamp(volume, 0, 100);
         Collection<Music> music = this.music.values();
         for(Music m : music) {
             m.setVolume(volume);

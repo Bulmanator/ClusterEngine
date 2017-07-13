@@ -11,7 +11,8 @@ This is a small engine built upon JSFML and was created as part of my university
     * PS3 (where drivers permit), PS4
 - Physics System
     * Rigid body collision detection and resolution
-    * Support for irregular convex polygons (SAT detection)
+    * Frictional resolution
+    * Support for irregular convex polygons (GJK detection)
 - Utilities
     * Name based content manager 
       * Textures, Fonts, Sounds and Music
@@ -24,11 +25,13 @@ This is a small engine built upon JSFML and was created as part of my university
 - Graphics
     * Shader support (RenderTexture instead of RenderWindow)
 - Physics System
-    * Circle-Circle Collisions
+    * ~~Circle-Circle Collisions~~ * Not usable yet
     * Circle-Polygon Collisions
     * Clipping and contact points
     * An actual broad-phase
     * Multiple fixtures per rigid body
+    * ~~Friction~~
+    * ~~GJK Collision detection over SAT~~
 - Messaging System
     * Broadcast
     * Observer-Listener
