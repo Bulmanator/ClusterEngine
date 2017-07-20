@@ -27,7 +27,7 @@ package com.cluster.engine.Graphics.Particles;
 import com.cluster.engine.Utilities.Interfaces.EntityRenderable;
 import com.cluster.engine.Utilities.Interfaces.Initialisable;
 import com.cluster.engine.Utilities.Interfaces.Updateable;
-import com.cluster.engine.Utilities.MathUtil;
+import com.cluster.engine.Utilities.MUtil;
 import org.jsfml.graphics.CircleShape;
 import org.jsfml.graphics.Color;
 import org.jsfml.graphics.RenderWindow;
@@ -103,12 +103,12 @@ class Particle implements Initialisable<ParticleConfig>, Updateable, EntityRende
         position = new Vector2f(config.position.x, config.position.y);
 
         // Work out the (x, y) velocity using the angle and speed
-        float angle = MathUtil.randomFloat(config.minAngle, config.maxAngle);
-        angle *= MathUtil.DEG_TO_RAD;
+        float angle = MUtil.randomFloat(config.minAngle, config.maxAngle);
+        angle *= MUtil.DEG_TO_RAD;
 
         velocity = new Vector2f(
-                config.speed * MathUtil.cos(angle),
-                -config.speed * MathUtil.sin(angle)
+                config.speed * MUtil.cos(angle),
+                -config.speed * MUtil.sin(angle)
         );
 
         // Set the rotational speed
@@ -126,7 +126,7 @@ class Particle implements Initialisable<ParticleConfig>, Updateable, EntityRende
             display = new CircleShape(startSize, config.pointCount);
         }
 
-        display.setRotation(angle * MathUtil.RAD_TO_DEG);
+        display.setRotation(angle * MUtil.RAD_TO_DEG);
 
         // Set the texture if one is present
         if(config.texture != null) display.setTexture(config.texture);
@@ -157,8 +157,8 @@ class Particle implements Initialisable<ParticleConfig>, Updateable, EntityRende
 
         // Reset the accumulator and set the lifetime
         accumulator = 0;
-        lifetime = MathUtil.randomFloat(config.minLifetime, config.maxLifetime);
-        lifetime = MathUtil.round(lifetime, 4);
+        lifetime = MUtil.randomFloat(config.minLifetime, config.maxLifetime);
+        lifetime = MUtil.round(lifetime, 4);
 
         colourTime = lifetime / (colourCount - 1);
 
@@ -180,7 +180,7 @@ class Particle implements Initialisable<ParticleConfig>, Updateable, EntityRende
 
             float ratio = accumulator / lifetime;
 
-            display.setRadius(MathUtil.lerp(startSize, endSize, ratio));
+            display.setRadius(MUtil.lerp(startSize, endSize, ratio));
             display.setOrigin(display.getRadius(), display.getRadius());
 
 
@@ -207,7 +207,7 @@ class Particle implements Initialisable<ParticleConfig>, Updateable, EntityRende
 
                 float colRatio = (accumulator - (colourTime * colourIndex)) / colourTime;
 
-                Color colour = MathUtil.lerpColour(start, end, colRatio);
+                Color colour = MUtil.lerpColour(start, end, colRatio);
 
                 display.setFillColor(new Color(colour, a));
             }

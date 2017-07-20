@@ -24,20 +24,19 @@
 
 package com.cluster.engine.Physics;
 
-import com.cluster.engine.Physics.Collisions.AABB;
-import com.cluster.engine.Physics.Collisions.Pair;
+import com.cluster.engine.Physics.Collisions.Manifold;
+import com.cluster.engine.Physics.Shapes.AABB;
 import com.cluster.engine.Utilities.Interfaces.EntityRenderable;
 import com.cluster.engine.Utilities.Interfaces.Updateable;
-import com.cluster.engine.Utilities.MathUtil;
-import com.cluster.engine.Utilities.State.State;
+import com.cluster.engine.Utilities.MUtil;
 import org.jsfml.graphics.*;
 import org.jsfml.system.Vector2f;
 
 import java.util.Vector;
 
 /**
- * A Class which represents the physics world and updates any body added to it
- * @author James Bulman
+ * a Class which represents the physics world and updates any body added to it
+ * @author James
  */
 public class World implements Updateable, EntityRenderable {
 
@@ -58,11 +57,11 @@ public class World implements Updateable, EntityRenderable {
     /** The gravity of the World that should act on the bodies */
     private Vector2f gravity;
 
-    /** A vector of all of the bodies currently registered to the World */
+    /** a vector of all of the bodies currently registered to the World */
     private Vector<RigidBody> bodies;
 
-    /** A vector which contains all pairs which require narrow phase collision checking */
-    private Vector<Pair> pairs;
+    /** a vector which contains all manifolds which require narrow phase collision checking */
+    private Vector<Manifold> manifolds;
 
     /**
      * Constructs a new physics world with the gravity applied
@@ -71,7 +70,7 @@ public class World implements Updateable, EntityRenderable {
     public World(Vector2f gravity) {
         this.gravity = gravity;
         bodies = new Vector<>();
-        pairs = new Vector<>();
+        manifolds = new Vector<>();
     }
 
     /**
@@ -80,46 +79,48 @@ public class World implements Updateable, EntityRenderable {
      */
     public void update(float dt) {
 
-        // Evaluate pairs of bodies to test for collisions
-        for(int i = 0; i < bodies.size(); i++) {
-            RigidBody A = bodies.get(i);
-            if(!A.isAlive()) continue;
+        // Evaluate manifolds of bodies to test for collisions
+        for (int i = 0; i < bodies.size(); i++) {
+            RigidBody a = bodies.get(i);
+            if (!a.isAlive()) continue;
 
-            for(int j = i + 1; j < bodies.size(); j++) {
-                RigidBody B = bodies.get(j);
-                if(!B.isAlive()) continue;
+            for (int j = i + 1; j < bodies.size(); j++) {
+                RigidBody b = bodies.get(j);
+                if (!b.isAlive()) continue;
 
-                Pair pair = new Pair(A, B);
+                Manifold manifold = new Manifold(a, b);
+                manifold.solve();
 
-                if(pair.evaluate()) {
-                    pairs.add(pair);
+                if (manifold.collided) {
+                    manifolds.add(manifold);
                 }
             }
         }
 
-        // Apply any pairs which did collide
-        for(int i = 0; i < 6; i++) {
-            for (Pair pair : pairs) {
-                pair.apply();
+        // Apply any manifolds which did collide
+        for (int i = 0; i < 6; i++) {
+            for (Manifold manifold : manifolds) {
+                manifold.apply();
             }
         }
 
         // Update body forces and positions
         for (RigidBody body : bodies) {
             // Apply gravity
-            body.applyForce(new Vector2f(gravity.x * body.getMass(), gravity.y * body.getMass()));
+            body.applyForce(new Vector2f(gravity.x * body.getMassData().mass,
+                    gravity.y * body.getMassData().mass));
             body.update(dt);
             // Reset any forces being applied to the body
             body.resetForces();
         }
 
         // Correct positions of any bodies which collided
-        for (Pair pair : pairs) {
-            pair.correctPosition();
+        for (Manifold manifold : manifolds) {
+            manifold.correctPosition();
         }
 
-        // Clear all collision pairs
-        pairs.clear();
+        // Clear all collision manifolds
+        manifolds.clear();
     }
 
     /**
@@ -131,24 +132,24 @@ public class World implements Updateable, EntityRenderable {
 
         for(RigidBody body : bodies) {
             if(DRAW_BODIES) {
-                ConvexShape shape = new ConvexShape(body.getShape().getVertices());
+                Shape shape = (Shape) body.getShape().getDrawable();
                 shape.setFillColor(Color.TRANSPARENT);
                 shape.setOutlineColor(BODY_COLOUR);
                 shape.setOutlineThickness(-1f);
 
                 shape.setPosition(body.getTransform().getPosition());
-                shape.setRotation(body.getTransform().getAngle() * MathUtil.RAD_TO_DEG);
+                shape.setRotation(body.getTransform().getAngle() * MUtil.RAD_TO_DEG);
 
                 renderer.draw(shape);
             }
 
             if(DRAW_AABB) {
-                AABB aabb = new AABB(body.getShape().getTransformed());
-                RectangleShape shape = new RectangleShape(new Vector2f(aabb.getHalfSize().x * 2, aabb.getHalfSize().y * 2));
-                shape.setPosition(Vector2f.sub(aabb.getCentre(), aabb.getHalfSize()));
+                AABB aabb = new AABB(body.getShape().getVertices(), body.getShape().getVertexCount());
+                RectangleShape shape = new RectangleShape(Vector2f.sub(aabb.getMaximum(), aabb.getMinimum()));
+                shape.setPosition(body.getTransform().getPosition());
                 shape.setFillColor(Color.TRANSPARENT);
                 shape.setOutlineColor(AABB_COLOUR);
-                shape.setOutlineThickness(1);
+                shape.setOutlineThickness(-1f);
 
                 renderer.draw(shape);
             }
@@ -191,7 +192,7 @@ public class World implements Updateable, EntityRenderable {
      * Clears all of the bodies in the world
      */
     public void clearBodies() {
-        pairs.clear();
+        manifolds.clear();
         bodies.clear();
     }
 }

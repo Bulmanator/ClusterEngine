@@ -30,7 +30,7 @@ import com.cluster.engine.Utilities.EngineConfig;
 import com.cluster.engine.Utilities.Interfaces.Disposable;
 import com.cluster.engine.Utilities.Interfaces.Renderable;
 import com.cluster.engine.Utilities.Interfaces.Updateable;
-import com.cluster.engine.Utilities.MathUtil;
+import com.cluster.engine.Utilities.MUtil;
 import org.jsfml.JSFML;
 import org.jsfml.graphics.RenderWindow;
 import org.jsfml.internal.JSFMLError;
@@ -105,7 +105,7 @@ public class Engine implements Updateable, Renderable, Disposable {
 
         // Clamp the FPS Limit as there aren't many screens which support > 144 Hz
         // The input lag frame rate issue seems to have fixed itself, more testing will take place
-        config.fpsLimit = (int)MathUtil.clamp(config.fpsLimit, -1, 144);
+        config.fpsLimit = (int) MUtil.clamp(config.fpsLimit, -1, 144);
 
         // Checks the FPS Limit
         // Works out either to use V-Sync or a custom frame timing
@@ -156,25 +156,6 @@ public class Engine implements Updateable, Renderable, Disposable {
 
         // Begins the Main loop
         while (!shouldClose) {
-            // Advances the accumulator
-            float elapsed = clock.getElapsedTime().asSeconds();
-            accumulator += elapsed;
-            clock.restart();
-
-            fps = Math.round(1 / elapsed);
-
-            // Clamps the accumulator
-            accumulator = MathUtil.clamp(accumulator, 0, 0.2f);
-
-            // If the accumulator has passed the specified delta time
-            // Then update the game
-            while (accumulator >= deltaTime) {
-                accumulator -= deltaTime;
-                update(deltaTime);
-            }
-
-            // Render the game
-            render();
 
             // Poll for events
             for (Event event : window.pollEvents()) {
@@ -247,6 +228,26 @@ public class Engine implements Updateable, Renderable, Disposable {
                         break;
                 }
             }
+
+            // Advances the accumulator
+            float elapsed = clock.getElapsedTime().asSeconds();
+            accumulator += elapsed;
+            clock.restart();
+
+            fps = Math.round(1 / elapsed);
+
+            // Clamps the accumulator
+            accumulator = MUtil.clamp(accumulator, 0, 0.2f);
+
+            // If the accumulator has passed the specified delta time
+            // Then update the game
+            while (accumulator >= deltaTime) {
+                accumulator -= deltaTime;
+                update(deltaTime);
+            }
+
+            // Render the game
+            render();
 
             window.setMouseCursorVisible(!controllerMoved);
         }

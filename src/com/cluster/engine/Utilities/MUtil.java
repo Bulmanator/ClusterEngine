@@ -25,13 +25,11 @@
 package com.cluster.engine.Utilities;
 
 import org.jsfml.graphics.Color;
-import org.jsfml.system.Vector2f;
-import org.jsfml.system.Vector3f;
 
 /**
  * Various useful maths functions
  */
-public final class MathUtil {
+public final class MUtil {
 
     /**
      * A floating point representation of Pi
@@ -46,7 +44,7 @@ public final class MathUtil {
     /**
      * A very small value for checking if floating point numbers are zero
      */
-    public static final float EPSILON = 1E-6f;
+    public static final float EPSILON = 0.000001f;
 
     /**
      * Used to convert angles from Degrees to Radians
@@ -59,7 +57,7 @@ public final class MathUtil {
     public static final float RAD_TO_DEG = 180f / PI;
 
     // Private constructor to prevent instantiation
-    private MathUtil() {}
+    private MUtil() {}
 
     /**
      * Calculates the square of the given number
@@ -69,18 +67,33 @@ public final class MathUtil {
     public static float square(float number) { return number * number; }
 
     /**
+     * Calculates the square root of the given number
+     * @param number The number to square root
+     * @return The square root
+     */
+    public static float sqrt(float number) {
+        return (float) Math.sqrt(number);
+    }
+
+    /**
      * A floating point conversion for {@link Math#cos(double)}
      * @param radians The angle, in radians
      * @return The cosine of the angle
      */
-    public static float cos(float radians) { return (float)Math.cos(radians); }
+    public static float cos(float radians) {
+        // TODO(James): Implement a cosine table instead for lookups
+        return (float)Math.cos(radians);
+    }
 
     /**
      * A floating point conversion for {@link Math#sin(double)}
      * @param radians The angle, in radians
      * @return The sine of the angle
      */
-    public static float sin(float radians) { return (float)Math.sin(radians); }
+    public static float sin(float radians) {
+        // TODO(James): Implement a sine table instead for lookups
+        return (float)Math.sin(radians);
+    }
 
     /**
      * Generates a random integer between the values specified, [min, max)
@@ -170,12 +183,12 @@ public final class MathUtil {
     }
 
     /**
-     * Checks if the given floating point value is less than {@link MathUtil#EPSILON}
+     * Checks if the given floating point value is less than {@link MUtil#EPSILON}
      * @param value The value to check
-     * @return True if the value is smaller than {@link MathUtil#EPSILON}, otherwise False
+     * @return True if the value is smaller than {@link MUtil#EPSILON}, otherwise False
      */
     public static boolean isZero(float value) {
-        return Math.abs(value) < EPSILON;
+        return Math.abs(value) <= EPSILON;
     }
 
     /**
@@ -185,7 +198,7 @@ public final class MathUtil {
      * @return True if the value is smaller than tolerance, otherwise False
      */
     public static boolean isZero(float value, float tolerance) {
-        return Math.abs(value) < tolerance;
+        return Math.abs(value) <= tolerance;
     }
 
     /**
@@ -194,80 +207,8 @@ public final class MathUtil {
      * @return the angle in radians between 180 degrees and -179 degrees
      */
     public static float normalizeAngle(float radians) {
-        while (radians <= -MathUtil.PI) radians += MathUtil.PI2;
-        while (radians > MathUtil.PI) radians -= MathUtil.PI2;
+        while (radians <= -MUtil.PI) radians += MUtil.PI2;
+        while (radians > MUtil.PI) radians -= MUtil.PI2;
         return radians;
-    }
-
-    // Vector2 Methods -- Vector2f doesn't have these for some reason
-
-    /**
-     * Gets the length of the given vector
-     * @param vector The vector to find the length of
-     * @return The length of the vector
-     */
-    public static float length(Vector2f vector) {
-        return (float) Math.sqrt((vector.x * vector.x) + (vector.y * vector.y));
-    }
-
-    /**
-     * Gets the length of the vector given square
-     * @param vector The vector to find the length of
-     * @return The square length of the vector
-     */
-    public static float lengthSq(Vector2f vector) {
-        return (vector.x * vector.x) + (vector.y * vector.y);
-    }
-
-    /**
-     * Returns the normalised vector of the given one
-     * @param vector The vector to normalise
-     * @return The normalised vector
-     */
-    public static Vector2f normalise(Vector2f vector) {
-        float len = length(vector);
-
-        if(len != 0) {
-            return new Vector2f(vector.x / len, vector.y / len);
-        }
-
-        return Vector2f.ZERO;
-    }
-
-    /**
-     * Calculates the resultant dot product of the vectors supplied
-     * @param a The first vector to perform the dot product on
-     * @param b The second vector to perform the dot product on
-     * @return The resultant dot product between the two vectors
-     */
-    public static float dot(Vector2f a, Vector2f b) {
-        return (a.x * b.x) + (a.y * b.y);
-    }
-
-    /**
-     * Calculates the cross product of the vectors supplied
-     * @param a The first vector to perform the cross product on
-     * @param b The second vector to perform the cross product on
-     * @return The resultant cross product between the two vectors
-     */
-    public static float cross(Vector2f a, Vector2f b) {
-        return (a.x * b.y) - (a.y * b.x);
-    }
-
-    /**
-     * Converts a Vector3f to a Vector2f using just the x and y components
-     * @param v The Vector3f to convert
-     * @return The x and y components as a Vector2f
-     */
-    public static Vector2f toVector2f(Vector3f v) { return new Vector2f(v.x, v.y); }
-
-    /**
-     * returns the mid point of two vectors
-     * @param a the first vector
-     * @param b the second vector
-     * @return the mid point vector
-     */
-    public static Vector2f midPoint(Vector2f a, Vector2f b){
-        return new Vector2f((a.x + b.x) / 2f, (a.y + b.y) / 2f);
     }
 }

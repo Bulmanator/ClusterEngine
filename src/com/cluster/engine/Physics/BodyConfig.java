@@ -24,10 +24,11 @@
 
 package com.cluster.engine.Physics;
 
+import com.cluster.engine.Physics.Shapes.Polygon;
 import org.jsfml.system.Vector2f;
 
 /**
- * A class used to initialise a {@link RigidBody}
+ * a class used to initialise a {@link RigidBody}
  */
 public class BodyConfig {
 
@@ -45,10 +46,18 @@ public class BodyConfig {
     public float restitution;
     /** The density of the body, default = 0.5 */
     public float density;
+
+    /** The friction coefficient between this and an object moving relative, default = 0.1f */
+    public float dynamicFriction;
+    /** The friction coefficient between this and a non-moving object, default = 0.1f */
+    public float staticFriction;
+
     /** The mask of bits which can collide with this body */
     public int mask;
     /** The mask of bits which this body can collide with */
     public int category;
+    /** Whether the body is static or not, default = false */
+    public boolean isStatic;
 
     /**
      * Creates a default body configuration
@@ -66,9 +75,13 @@ public class BodyConfig {
         restitution = 0.2f;
         density = 0.5f;
 
+        dynamicFriction = 0.1f;
+        staticFriction = 0.1f;
+
         // Other
         mask = 0xFFFF;
         category = 0x0001;
+        isStatic = false;
     }
 
 }

@@ -24,7 +24,7 @@
 
 package com.cluster.engine.Physics;
 
-import com.cluster.engine.Utilities.MathUtil;
+import com.cluster.engine.Utilities.MUtil;
 import org.jsfml.system.Vector2f;
 
 /**
@@ -32,6 +32,8 @@ import org.jsfml.system.Vector2f;
  * @author James Bulman
  */
 public class Transform {
+
+    // TODO(James): Redo this to provide inverse transformations
 
     /** The position of the object on the screen */
     private Vector2f position;
@@ -58,8 +60,8 @@ public class Transform {
     public Transform(Vector2f position, float angle) {
         this.position = position;
         this.angle = angle;
-        sin = MathUtil.sin(angle);
-        cos = MathUtil.cos(angle);
+        sin = MUtil.sin(angle);
+        cos = MUtil.cos(angle);
     }
 
     /**
@@ -117,7 +119,7 @@ public class Transform {
      */
     void setAngle(float angle) {
         this.angle = angle;
-        sin = MathUtil.sin(angle);
-        cos = MathUtil.cos(angle);
+        sin = MUtil.sin(angle);
+        cos = MUtil.cos(angle);
     }
 }
