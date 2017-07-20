@@ -70,6 +70,14 @@ public class Manifold {
     }
 
     public void solve() {
+
+        MassData massA = a.getMassData();
+        MassData massB = b.getMassData();
+        if(MUtil.isZero(massA.invMass + massB.invMass)) {
+            collided = false;
+            return;
+        }
+
         Polygon a = this.a.getShape();
         Polygon b = this.b.getShape();
 

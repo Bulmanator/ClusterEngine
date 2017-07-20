@@ -149,7 +149,7 @@ public class World implements Updateable, EntityRenderable {
                 shape.setPosition(body.getTransform().getPosition());
                 shape.setFillColor(Color.TRANSPARENT);
                 shape.setOutlineColor(AABB_COLOUR);
-                shape.setOutlineThickness(1);
+                shape.setOutlineThickness(-1f);
 
                 renderer.draw(shape);
             }
