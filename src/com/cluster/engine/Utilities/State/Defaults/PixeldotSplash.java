@@ -1,5 +1,6 @@
 package com.cluster.engine.Utilities.State.Defaults;
 
+import com.cluster.engine.Utilities.ContentManager;
 import com.cluster.engine.Utilities.MathUtil;
 import com.cluster.engine.Utilities.State.GameStateManager;
 import com.cluster.engine.Utilities.State.State;
@@ -15,6 +16,7 @@ public class PixeldotSplash extends State{
     private float angle;
     private int textAlpha;
     private State next;
+    private Font f;
 
     public PixeldotSplash(GameStateManager gsm, Vector2f worldSize) {
         super(gsm, worldSize);
@@ -22,6 +24,8 @@ public class PixeldotSplash extends State{
         textAlpha = 0;
         duration = 1f;
         angle = 0;
+        ContentManager.getInstance().loadFont("BigNoodle","big_noodle_titling.ttf");
+        f = ContentManager.getInstance().getFont("BigNoodle");
         //next = nextState;
     }
 
@@ -32,10 +36,9 @@ public class PixeldotSplash extends State{
             angle = -90*logoTime/duration;
             logoTime += dt* MathUtil.sin(180*MathUtil.DEG_TO_RAD*logoTime/duration);
         }
-        else {
-            textAlpha += 200*dt;
+        if (logoTime > duration*0.8f){
+            textAlpha += 255*dt;
             textAlpha = Math.min(textAlpha, 255);
-            System.out.println(textAlpha);
         }
         if (textAlpha == 255) {
             //gsm.setState(next);
@@ -72,6 +75,18 @@ public class PixeldotSplash extends State{
         r.setSize(size);
         r.setRotation(angle - (90*(logoTime/duration)/3*2));
         window.draw(r, rs);
+
+        Text t = new Text("Pixeldot", f);
+        t.setCharacterSize(200);
+        t.setColor(new Color(0,0,0,textAlpha));
+        t.setPosition(worldSize.x/2 - t.getLocalBounds().width/2-10, worldSize.y/2 - t.getLocalBounds().height*1.5f);
+        window.draw(t);
+
+        t = new Text("studios", f);
+        t.setCharacterSize(200);
+        t.setColor(new Color(0,0,0,textAlpha));
+        t.setPosition(worldSize.x/2 - t.getLocalBounds().width/2-10, worldSize.y/2);
+        window.draw(t);
     }
 
     @Override
