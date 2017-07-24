@@ -20,7 +20,7 @@ public class PixeldotSplash extends State{
 
     public PixeldotSplash(GameStateManager gsm, Vector2f worldSize) {
         super(gsm, worldSize);
-        logoTime = 0.1f;
+        logoTime = 0.05f;
         textAlpha = 0;
         duration = 1f;
         angle = 0;
@@ -33,7 +33,7 @@ public class PixeldotSplash extends State{
     public void update(float dt) {
 
         if (logoTime < duration) {
-            angle = -90*logoTime/duration;
+            angle = -180*logoTime/duration;
             logoTime += dt* MathUtil.sin(180*MathUtil.DEG_TO_RAD*logoTime/duration);
         }
         if (logoTime > duration*0.8f){
