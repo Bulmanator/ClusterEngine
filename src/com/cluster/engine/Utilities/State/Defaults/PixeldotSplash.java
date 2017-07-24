@@ -1,5 +1,6 @@
 package com.cluster.engine.Utilities.State.Defaults;
 
+import com.cluster.engine.Utilities.MathUtil;
 import com.cluster.engine.Utilities.State.GameStateManager;
 import com.cluster.engine.Utilities.State.State;
 import org.jsfml.graphics.*;
@@ -17,7 +18,7 @@ public class PixeldotSplash extends State{
 
     public PixeldotSplash(GameStateManager gsm, Vector2f worldSize) {
         super(gsm, worldSize);
-        logoTime = 0;
+        logoTime = 0.1f;
         textAlpha = 0;
         duration = 1f;
         angle = 0;
@@ -29,7 +30,7 @@ public class PixeldotSplash extends State{
 
         if (logoTime < duration) {
             angle = -90*logoTime/duration;
-            logoTime += dt;
+            logoTime += dt* MathUtil.sin(180*MathUtil.DEG_TO_RAD*logoTime/duration);
         }
         else {
             textAlpha += 200*dt;
