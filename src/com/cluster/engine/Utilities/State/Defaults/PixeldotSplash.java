@@ -6,6 +6,8 @@ import com.cluster.engine.Utilities.State.GameStateManager;
 import com.cluster.engine.Utilities.State.State;
 import org.jsfml.graphics.*;
 import org.jsfml.system.Vector2f;
+import org.jsfml.window.Keyboard;
+import org.jsfml.window.Mouse;
 
 /**
  * @author Matthew Threlfall
@@ -43,6 +45,11 @@ public class PixeldotSplash extends State{
         if (textAlpha == 255) {
             //gsm.setState(next);
         }
+        if(Mouse.isButtonPressed(Mouse.Button.LEFT) || Keyboard.isKeyPressed(Keyboard.Key.SPACE)) {
+            textAlpha = 255;
+            logoTime = duration;
+            angle = -180;
+        }
     }
 
 
@@ -77,13 +84,13 @@ public class PixeldotSplash extends State{
         window.draw(r, rs);
 
         Text t = new Text("Pixeldot", f);
-        t.setCharacterSize(200);
+        t.setCharacterSize(180);
         t.setColor(new Color(0,0,0,textAlpha));
         t.setPosition(worldSize.x/2 - t.getLocalBounds().width/2-10, worldSize.y/2 - t.getLocalBounds().height*1.5f);
         window.draw(t);
 
         t = new Text("studios", f);
-        t.setCharacterSize(200);
+        t.setCharacterSize(180);
         t.setColor(new Color(0,0,0,textAlpha));
         t.setPosition(worldSize.x/2 - t.getLocalBounds().width/2-10, worldSize.y/2);
         window.draw(t);
