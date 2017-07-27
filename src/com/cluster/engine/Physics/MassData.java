@@ -23,7 +23,7 @@
 */
 package com.cluster.engine.Physics;
 
-import com.cluster.engine.Utilities.MUtil;
+import com.cluster.engine.Utilities.Maths.MUtil;
 
 public class MassData {
 

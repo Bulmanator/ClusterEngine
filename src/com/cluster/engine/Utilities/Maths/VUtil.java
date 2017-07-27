@@ -21,7 +21,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
-package com.cluster.engine.Utilities;
+package com.cluster.engine.Utilities.Maths;
 
 import org.jsfml.system.Vector2f;
 import org.jsfml.system.Vector3f;
@@ -137,15 +137,5 @@ public final class VUtil {
         float dotB = dot(b, b);
 
         return Vector2f.mul(b, dotA / dotB);
-    }
-
-    /**
-     * returns the mid point of two vectors
-     * @param a the first vector
-     * @param b the second vector
-     * @return the mid point vector
-     */
-    public static Vector2f midPoint(Vector2f a, Vector2f b){
-        return new Vector2f((a.x + b.x) / 2f, (a.y + b.y) / 2f);
     }
 }

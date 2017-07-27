@@ -23,15 +23,15 @@
 */
 package com.cluster.engine.Physics.Collisions;
 
+import com.cluster.engine.Components.Transform;
 import com.cluster.engine.Physics.Collisions.Callbacks.CollisionJumpTable;
 import com.cluster.engine.Physics.MassData;
 import com.cluster.engine.Physics.Material;
 import com.cluster.engine.Physics.RigidBody;
 import com.cluster.engine.Physics.Shapes.AABB;
 import com.cluster.engine.Physics.Shapes.Polygon;
-import com.cluster.engine.Physics.Transform;
-import com.cluster.engine.Utilities.MUtil;
-import com.cluster.engine.Utilities.VUtil;
+import com.cluster.engine.Utilities.Maths.MUtil;
+import com.cluster.engine.Utilities.Maths.VUtil;
 import org.jsfml.system.Vector2f;
 
 /**
@@ -78,24 +78,21 @@ public class Manifold {
             return;
         }
 
-        Polygon a = this.a.getShape();
-        Polygon b = this.b.getShape();
+        Polygon sa = a.getShape();
+        Polygon sb = b.getShape();
 
-        AABB aabbA = new AABB(a.getVertices(), a.getVertexCount());
-        AABB aabbB = new AABB(b.getVertices(), b.getVertexCount());
-
-        aabbA.transform(this.a.getTransform());
-        aabbB.transform(this.b.getTransform());
+        AABB aabbA = new AABB(sa, a.getTransform());
+        AABB aabbB = new AABB(sb, b.getTransform());
 
         if(!AABB.overlaps(aabbA, aabbB)) {
             collided = false;
             return;
         }
 
-        int ia = a.getType().index;
-        int ib = b.getType().index;
+        int ia = sa.getType().index;
+        int ib = sb.getType().index;
 
-        CollisionJumpTable.handlers[ia][ib].handleCollision(this, a, b);
+        CollisionJumpTable.handlers[ia][ib].handleCollision(this, sa, sb);
     }
 
     public void apply() {
@@ -132,11 +129,17 @@ public class Manifold {
         // Work out the actual impulse to apply
         Vector2f impulse = new Vector2f(normal.x * impulseMag, normal.y * impulseMag);
 
+        float massSum = massA.mass + massB.mass;
+        float ratio = massA.mass / massSum;
+
         // Apply Impulse to body a
-        a.applyImpulse(Vector2f.neg(impulse));
+        a.applyImpulse(Vector2f.mul(Vector2f.neg(impulse), ratio));
+
+        ratio = massB.mass / massSum;
 
         // Apply Impulse to body b
-        b.applyImpulse(impulse);
+        b.applyImpulse(Vector2f.mul(impulse, ratio));
+
 
         Vector2f tangent = Vector2f.sub(rv, Vector2f.mul(normal, VUtil.dot(rv, normal)));
         tangent = VUtil.normalise(tangent);
@@ -173,7 +176,7 @@ public class Manifold {
         MassData massA = a.getMassData();
         MassData massB = b.getMassData();
 
-        float correctionVal = (Math.max(overlap - 0.01f, 0.0f) / (massA.invMass + massB.invMass)) * 0.2f;
+        float correctionVal = (Math.max(overlap - 0.05f, 0.0f) / (massA.invMass + massB.invMass)) * 0.2f;
 
         Vector2f correction = new Vector2f(correctionVal * normal.x, correctionVal * normal.y);
 
@@ -183,7 +186,11 @@ public class Manifold {
         Vector2f positionB = Vector2f.add(b.getTransform().getPosition(),
                 new Vector2f(correction.x * massB.invMass, correction.y * massB.invMass));
 
-        a.setTransform(positionA, a.getTransform().getAngle());
-        b.setTransform(positionB, b.getTransform().getAngle());
+
+        Transform txA = a.getTransform();
+        Transform txB = b.getTransform();
+
+        txA.setPosition(positionA);
+        txB.setPosition(positionB);
     }
 }

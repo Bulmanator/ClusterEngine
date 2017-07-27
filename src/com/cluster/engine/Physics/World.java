@@ -28,14 +28,14 @@ import com.cluster.engine.Physics.Collisions.Manifold;
 import com.cluster.engine.Physics.Shapes.AABB;
 import com.cluster.engine.Utilities.Interfaces.EntityRenderable;
 import com.cluster.engine.Utilities.Interfaces.Updateable;
-import com.cluster.engine.Utilities.MUtil;
+import com.cluster.engine.Utilities.Maths.MUtil;
 import org.jsfml.graphics.*;
 import org.jsfml.system.Vector2f;
 
 import java.util.Vector;
 
 /**
- * a Class which represents the physics world and updates any body added to it
+ * A Class which represents the physics world and updates any body added to it
  * @author James
  */
 public class World implements Updateable, EntityRenderable {
@@ -65,10 +65,9 @@ public class World implements Updateable, EntityRenderable {
 
     /**
      * Constructs a new physics world with the gravity applied
-     * @param gravity The gravity of the world
      */
-    public World(Vector2f gravity) {
-        this.gravity = gravity;
+    public World() {
+        this.gravity = Vector2f.ZERO;
         bodies = new Vector<>();
         manifolds = new Vector<>();
     }
@@ -106,6 +105,8 @@ public class World implements Updateable, EntityRenderable {
 
         // Update body forces and positions
         for (RigidBody body : bodies) {
+            if(!body.isAlive() || body.isStatic()) continue;
+
             // Apply gravity
             body.applyForce(new Vector2f(gravity.x * body.getMassData().mass,
                     gravity.y * body.getMassData().mass));
@@ -131,20 +132,23 @@ public class World implements Updateable, EntityRenderable {
         if(!(DRAW_AABB || DRAW_BODIES || DRAW_VELOCITIES)) return;
 
         for(RigidBody body : bodies) {
+            if(!body.isAlive()) continue;
+
+
             if(DRAW_BODIES) {
                 Shape shape = (Shape) body.getShape().getDrawable();
                 shape.setFillColor(Color.TRANSPARENT);
                 shape.setOutlineColor(BODY_COLOUR);
-                shape.setOutlineThickness(-1f);
+                shape.setOutlineThickness(1f);
 
                 shape.setPosition(body.getTransform().getPosition());
-                shape.setRotation(body.getTransform().getAngle() * MUtil.RAD_TO_DEG);
+                shape.setRotation(body.getTransform().getRotation().getAngle() * MUtil.RAD_TO_DEG);
 
                 renderer.draw(shape);
             }
 
             if(DRAW_AABB) {
-                AABB aabb = new AABB(body.getShape().getVertices(), body.getShape().getVertexCount());
+                AABB aabb = new AABB(body.getShape(), body.getTransform());
                 RectangleShape shape = new RectangleShape(Vector2f.sub(aabb.getMaximum(), aabb.getMinimum()));
                 shape.setPosition(body.getTransform().getPosition());
                 shape.setFillColor(Color.TRANSPARENT);
@@ -167,13 +171,17 @@ public class World implements Updateable, EntityRenderable {
         }
     }
 
+    public void setGravity(Vector2f gravity) {
+        this.gravity = gravity;
+    }
+
     /**
      * Removes a body from the world
      * @param body The body to remove
      * @return True if the body is successfully removed, otherwise false
      */
-    public boolean removeBody(RigidBody body) {
-        return bodies.remove(body);
+    public void removeBody(RigidBody body) {
+        bodies.remove(body);
     }
 
     /**

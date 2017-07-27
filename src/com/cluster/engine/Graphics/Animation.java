@@ -24,8 +24,8 @@
 
 package com.cluster.engine.Graphics;
 
-import com.cluster.engine.Utilities.Interfaces.EntityRenderable;
-import com.cluster.engine.Utilities.Interfaces.Updateable;
+import com.cluster.engine.Components.Component;
+import com.cluster.engine.Components.Transform;
 import org.jsfml.graphics.IntRect;
 import org.jsfml.graphics.RenderWindow;
 import org.jsfml.graphics.Sprite;
@@ -35,22 +35,26 @@ import org.jsfml.system.Vector2f;
 /**
  * A Class which will animate a sprite sheet
  */
-public class Animation implements Updateable, EntityRenderable {
+public class Animation extends Component {
 
     /** Whether or not the animation is playing */
     private boolean playing;
+    /** Whether or not the animation is active. Inactive animations will not be rendered */
+    private boolean active;
 
     /** The texture source of the animation */
     private Texture texture;
 
-    /** The position of the animation on the screen */
-    private Vector2f position;
     /** Whether to flip the animation in the x direction */
     private boolean flipX;
     /** Whether to flip the animation in the y direction */
     private boolean flipY;
-    /** The amount to rotate the animation by, in degrees */
-    private float angle;
+
+    /** The size, in pixels, of the animation */
+    private Vector2f size;
+
+    /** The offset from the GameObjects transform */
+    private Vector2f offset;
 
     /** The width of a frame in the animation */
     public final int width;
@@ -72,8 +76,8 @@ public class Animation implements Updateable, EntityRenderable {
     /** How long has passed since the last frame, in seconds */
     private float accumulator;
 
-    /** The scale of the sprite*/
-    private Vector2f scale;
+    // TODO(James): Sort out scale via Transform
+    //private Vector2f scale;
 
     /**
      * Creates an animation from the given texture key, with a time per frame of 0.1 seconds
@@ -81,7 +85,7 @@ public class Animation implements Updateable, EntityRenderable {
      * @param rows The number of rows in the animation sheet
      * @param columns The number of columns in the animation sheet
      */
-    public Animation(Texture texture, int rows, int columns) { this(texture, rows, columns, 0.1f); }
+    public Animation(String name, Texture texture, int rows, int columns) { this(name, texture, rows, columns, 0.1f); }
 
     /**
      * Creates an animation from the given texture key, with a time per frame as given
@@ -90,7 +94,9 @@ public class Animation implements Updateable, EntityRenderable {
      * @param columns The number of columns in the animation sheet
      * @param timePerFrame The time each frame lasts for, in seconds
      */
-    public Animation(Texture texture, int rows, int columns, float timePerFrame) {
+    public Animation(String name, Texture texture, int rows, int columns, float timePerFrame) {
+        super(name);
+
         // Get the texture from the content manager
         this.texture = texture;
 
@@ -107,19 +113,20 @@ public class Animation implements Updateable, EntityRenderable {
         width = texture.getSize().x / columns;
         height = texture.getSize().y / rows;
 
-        // Sets the position to (0, 0)
-        position = new Vector2f(0, 0);
+        size = new Vector2f(width, height);
+
+        // Sets the offset to (0, 0)
+        offset = new Vector2f(0, 0);
 
         // Sets playing
         playing = true;
 
         flipX = flipY = false;
-        angle = 0;
 
         // Resets the time accumulator
         accumulator = 0;
 
-        scale = new Vector2f(1,1);
+        active = true;
     }
 
     /**
@@ -128,7 +135,7 @@ public class Animation implements Updateable, EntityRenderable {
      */
     public void update(float dt) {
         // Return if not playing
-        if(!playing) return;
+        if(!playing || !active) return;
 
         // Advance the amount of time since last frame
         accumulator += dt;
@@ -146,20 +153,26 @@ public class Animation implements Updateable, EntityRenderable {
     }
 
     /**
-     * Draws the animation, at its position and on its current frame, to the screen
+     * Draws the animation, at its offset and on its current frame, to the screen
      * @param renderer The {@link RenderWindow} to draw the entity to
      */
     public void render(RenderWindow renderer) {
+        if(!active) return;
 
-        // Create a sprite and set its position
+        Transform tx = getGameObject().getTransform();
+        Vector2f position = Vector2f.add(tx.getPosition(), offset);
+
+        // Create a sprite and set its offset
         Sprite sprite = new Sprite(texture);
-        sprite.setScale(scale);
         sprite.setOrigin(width / 2, height / 2);
         sprite.setPosition(position);
-        sprite.setRotation(angle);
+        sprite.setRotation(tx.getRotation().getAngle());
 
-        if(flipX) sprite.setScale(-1, 1);
-        if(flipY) sprite.setScale(sprite.getScale().x, -1);
+        Vector2f scale = new Vector2f(size.x / (float) width, size.y / (float) height);
+        sprite.setScale(scale);
+
+        if(flipX) sprite.setScale(-scale.x, scale.y);
+        if(flipY) sprite.setScale(sprite.getScale().x, scale.y);
 
         // Work out UV coordinates within the sprite sheet
         int row = (int)(((float) currentFrame) / ((float) columns));
@@ -171,10 +184,10 @@ public class Animation implements Updateable, EntityRenderable {
     }
 
     /**
-     * Gets the current position of the animation
-     * @return The position
+     * Gets the current offset of the animation
+     * @return The offset from the Transform of the GameObject
      */
-    public Vector2f getPosition() { return position; }
+    public Vector2f getOffset() { return offset; }
 
     /**
      * Gets how long each frame lasts for, in seconds
@@ -189,6 +202,12 @@ public class Animation implements Updateable, EntityRenderable {
     public boolean isPlaying() { return playing; }
 
     /**
+     * Whether or not the animation is active
+     * @return True if the animation is active, otherwise false
+     */
+    public boolean isActive() { return active; }
+
+    /**
      * Whether or not the animation is flipped in the x direction
      * @return True if it is flipped, otherwise False
      */
@@ -201,23 +220,16 @@ public class Animation implements Updateable, EntityRenderable {
     public boolean isFlippedY() { return flipY; }
 
     /**
-     * Gets the current rotation of the animation
-     * @return The angle which the animation is rotated by, in degrees
+     * Returns the {@link Type#Animation} type
+     * @return The animation type
      */
-    public float getRotation() { return angle; }
+    public Type getType() { return Type.Animation; }
 
     /**
-     * Sets the position to the parameters given
-     * @param x The x coordinate of the position
-     * @param y The y coordinate of the position
+     * Sets the offset to the given amount
+     * @param offset The amount to offset by
      */
-    public void setPosition(float x, float y) { setPosition(new Vector2f(x, y)); }
-
-    /**
-     * Sets the position to the one given
-     * @param position The new position to set
-     */
-    public void setPosition(Vector2f position) { this.position = position; }
+    public void setOffset(Vector2f offset) { this.offset = offset; }
 
     /**
      * Sets whether or not the animation should be flipped in the x direction
@@ -232,46 +244,16 @@ public class Animation implements Updateable, EntityRenderable {
     public void setFlippedY(boolean flipY) { this.flipY = flipY; }
 
     /**
-     * Rotates the animation by the given angle
-     * @param degrees The amount to rotate by, in degrees
-     */
-    public void rotate(float degrees) {
-        angle += degrees;
-
-        // Keep it between 0 and 360
-        if(angle > 360) {
-            angle -= 360;
-        }
-        else if(angle < 0) {
-            angle += 360;
-        }
-    }
-
-    /**
-     * Sets the rotation of the sprite to the given angle
-     * @param degrees The angle to set the rotation to, in degrees
-     */
-    public void setRotation(float degrees) {
-        angle = degrees;
-
-        // Keep it between 0 and 360
-        if(this.angle > 360) {
-            int m = (int)angle % 360;
-            angle -= (m * 360);
-
-        }
-        else if(this.angle < 0) {
-            int m = (int)angle % 360;
-            angle += (m * 360);
-        }
-
-    }
-
-    /**
      * Sets whether or not the animation should play
      * @param playing True to play the animation, False to stop the animation
      */
     public void setPlaying(boolean playing) { this.playing = playing; }
+
+    /**
+     * Sets whether or not the animation should be active
+     * @param active True to set the animation as active, false to deactivate the animation
+     */
+    public void setActive(boolean active) { this.active = active; }
 
     /**
      * Sets how long each frame lasts for to the time given
@@ -279,10 +261,10 @@ public class Animation implements Updateable, EntityRenderable {
      */
     public void setTimePerFrame(float timePerFrame) { this.timePerFrame = timePerFrame; }
 
-    public void setScale(float xSize, float ySize){
-        float x, y;
-        x = xSize / width;
-        y = ySize / height;
-        scale = new Vector2f(x, y);
-    }
+    /**
+     * Set the sixe of the animation, in pixels
+     * @param size A vector containing the width and height of the animation, in pixels
+     */
+    public void setSize(Vector2f size) { this.size = size; }
+
 }

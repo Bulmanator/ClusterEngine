@@ -34,7 +34,7 @@ public class BodyConfig {
 
     /** The shape used to represent the body */
     public Polygon shape;
-    /** The position the body should start at, default = (0, 0) */
+    /** The offset the body should start at, default = (0, 0) */
     public Vector2f position;
 
     /** The starting linear velocity of the body, default = (0, 0) */

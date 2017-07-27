@@ -24,7 +24,9 @@
 
 package com.cluster.engine.Utilities.State;
 
+import com.cluster.engine.Components.GameObjectManager;
 import com.cluster.engine.Game;
+import com.cluster.engine.Physics.World;
 import com.cluster.engine.Utilities.Interfaces.Disposable;
 import com.cluster.engine.Utilities.Interfaces.Renderable;
 import com.cluster.engine.Utilities.Interfaces.Updateable;
@@ -39,17 +41,18 @@ import org.jsfml.system.Vector2f;
 public abstract class State implements Renderable, Updateable, Disposable {
 
     /** The Game instance used to get information for this State */
-    protected Game game;
+    protected final Game game;
     /** The {@link GameStateManager} this State belongs to */
-    protected GameStateManager gsm;
+    protected final GameStateManager gsm;
+
+    protected final World world;
+    protected final GameObjectManager objectManager;
 
     /** The Window used for rendering */
-    protected RenderWindow window;
+    protected final RenderWindow window;
 
     /** The View used for moving the Camera */
     protected View view;
-
-    protected Vector2f worldSize;
 
     /** A VectorUtil used for converting mouse coordinates from screen to world */
     protected Vector2f mouse;
@@ -68,14 +71,17 @@ public abstract class State implements Renderable, Updateable, Disposable {
         // Gets the Window from the Game
         window = game.getWindow();
 
-        worldSize = new Vector2f(window.getSize());
+        objectManager = game.getEngine().getObjectManager();
+        world = game.getEngine().getWorld();
 
         // Creates a new View and applies it
-        view = new View(new Vector2f(worldSize.x / 2f, worldSize.y / 2f), worldSize);
-
-        // Initialises the Vector to 0, 0
-        mouse = new Vector2f(0, 0);
+        Vector2f size = new Vector2f(window.getSize());
+        Vector2f centre = new Vector2f(size.x / 2f, size.y / 2f);
+        view = new View(centre, size);
         window.setView(view);
+
+        // Initialises the Mouse to 0, 0
+        mouse = new Vector2f(0, 0);
     }
 
     /**
@@ -92,6 +98,6 @@ public abstract class State implements Renderable, Updateable, Disposable {
     /**
      * Runs once the State is removed from the {@link GameStateManager}, used to delete unused objects
      */
-    public abstract void dispose();
+    public void dispose() {}
 
 }

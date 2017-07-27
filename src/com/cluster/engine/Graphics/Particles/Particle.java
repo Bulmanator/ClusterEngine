@@ -25,9 +25,8 @@
 package com.cluster.engine.Graphics.Particles;
 
 import com.cluster.engine.Utilities.Interfaces.EntityRenderable;
-import com.cluster.engine.Utilities.Interfaces.Initialisable;
 import com.cluster.engine.Utilities.Interfaces.Updateable;
-import com.cluster.engine.Utilities.MUtil;
+import com.cluster.engine.Utilities.Maths.MUtil;
 import org.jsfml.graphics.CircleShape;
 import org.jsfml.graphics.Color;
 import org.jsfml.graphics.RenderWindow;
@@ -37,9 +36,9 @@ import org.jsfml.system.Vector2f;
  * Represents a single particle inside the particle system
  * @author James Bulman
  */
-class Particle implements Initialisable<ParticleConfig>, Updateable, EntityRenderable {
+class Particle implements Updateable, EntityRenderable {
 
-    /** The position of the particle */
+    /** The offset of the particle */
     private Vector2f position;
     /** The velocity of the particle */
     private Vector2f velocity;
@@ -69,7 +68,7 @@ class Particle implements Initialisable<ParticleConfig>, Updateable, EntityRende
     private boolean alive;
 
     /**
-     * Constructs a Particle, Use {@link Particle#initialise(ParticleConfig)} to configure the particle
+     * Constructs a Particle, Use {@link Particle#initialise(ParticleConfig, Vector2f)} to configure the particle
      */
     Particle() {
         // Positional
@@ -98,9 +97,9 @@ class Particle implements Initialisable<ParticleConfig>, Updateable, EntityRende
      * Initialises the particle from the given configuration
      * @param config The {@link ParticleConfig} to initialise the particle with
      */
-    public void initialise(ParticleConfig config) {
-        // Set the position
-        position = new Vector2f(config.position.x, config.position.y);
+    public void initialise(ParticleConfig config, Vector2f position) {
+        // Set the offset
+        this.position = position;
 
         // Work out the (x, y) velocity using the angle and speed
         float angle = MUtil.randomFloat(config.minAngle, config.maxAngle);
@@ -147,7 +146,7 @@ class Particle implements Initialisable<ParticleConfig>, Updateable, EntityRende
             System.arraycopy(config.colours, 0, colours, 0, colourCount);
         }
 
-        // Set display position
+        // Set display offset
         display.setOrigin(startSize, startSize);
         display.setPosition(position);
         display.setFillColor(colours[0]);

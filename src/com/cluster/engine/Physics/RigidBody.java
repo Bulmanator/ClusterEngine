@@ -24,17 +24,19 @@
 
 package com.cluster.engine.Physics;
 
+import com.cluster.engine.Components.Component;
+import com.cluster.engine.Components.GameObject;
+import com.cluster.engine.Components.Transform;
 import com.cluster.engine.Physics.Shapes.Polygon;
-import com.cluster.engine.Utilities.Interfaces.Updateable;
-import com.cluster.engine.Utilities.MUtil;
-import com.cluster.engine.Utilities.VUtil;
+import com.cluster.engine.Utilities.Maths.MUtil;
+import com.cluster.engine.Utilities.Maths.VUtil;
 import org.jsfml.system.Vector2f;
 
 /**
  * Represents a physics body within the world
  * @author James Bulman
  */
-public class RigidBody implements Updateable {
+public class RigidBody extends Component {
 
     // TODO(James): Allowing multiple shapes/ fixtures per body
     static final int MAX_FIXTURES = 4;
@@ -73,12 +75,10 @@ public class RigidBody implements Updateable {
      * @param config The configuration to make to body from
      */
     RigidBody(BodyConfig config, World world) {
+        super("Body");
 
         if(config.shape == null)
             throw new IllegalArgumentException("Error: Shape cannot be null");
-
-        transform = new Transform();
-        transform.setPosition(config.position);
 
         isStatic = config.isStatic;
         if(isStatic) {
@@ -116,7 +116,7 @@ public class RigidBody implements Updateable {
         force = Vector2f.ZERO;
         torque = 0;
 
-        alive = true;
+        alive = false;
 
         mask = config.mask;
         category = config.category;
@@ -144,7 +144,8 @@ public class RigidBody implements Updateable {
         Vector2f dx = new Vector2f(velocity.x * dt, velocity.y * dt);
         transform.setPosition(Vector2f.add(transform.getPosition(), dx));
 
-        transform.setAngle(transform.getAngle() + (angularVelocity * dt));
+        transform.move(dx);
+        transform.getRotation().rotate(angularVelocity * dt);
 
         dv = new Vector2f(acceleration.x * dth, acceleration.y * dth);
         velocity = Vector2f.add(velocity, dv);
@@ -153,7 +154,7 @@ public class RigidBody implements Updateable {
     /**
      * Sets the force and the torque being applied to the body to zero
      */
-    public void resetForces() {
+    void resetForces() {
         force = Vector2f.ZERO;
         torque = 0;
     }
@@ -175,16 +176,6 @@ public class RigidBody implements Updateable {
     }
 
     /**
-     * Sets the body to the given position and rotates it to the given angle
-     * @param position The position to set the body to
-     * @param angle The angle to set the body to
-     */
-    public void setTransform(Vector2f position, float angle) {
-        transform.setPosition(position);
-        transform.setAngle(angle);
-    }
-
-    /**
      * Will return the speed of the body
      * @return the resultant speed of the body
      */
@@ -197,12 +188,6 @@ public class RigidBody implements Updateable {
      * @return The shape
      */
     public Polygon getShape() { return shape; }
-
-    /**
-     * Gets the transform of the body
-     * @return The transform
-     */
-    public Transform getTransform() { return transform; }
 
     /**
      * Gets the current linear velocity of the body
@@ -252,11 +237,43 @@ public class RigidBody implements Updateable {
      */
     public World getWorld() { return world; }
 
+    public Transform getTransform() {
+        return transform;
+    }
+
+
     /**
      * Sets the linear velocity of the body
      * @param velocity The new linear velocity to set
      */
     public void setVelocity(Vector2f velocity) { this.velocity = velocity; }
+
+    /**
+     * Sets the GameObject this RigidBody is attached to and gets its transform
+     * @param object The GameObject to attach this to
+     */
+    public void setGameObject(GameObject object) {
+        super.setGameObject(object);
+        if(object != null) {
+            transform = object.getTransform();
+            alive = true;
+        }
+        else {
+            transform = null;
+            alive = false;
+        }
+    }
+
+    /**
+     * Gets whether or not the body is static
+     * @return True if the body is a static body, otherwise false
+     */
+    public boolean isStatic() { return isStatic; }
+
+    @Override
+    public Type getType() {
+        return Type.RigidBody;
+    }
 
     /**
      * Sets the angular veloctiy of the body
@@ -269,6 +286,7 @@ public class RigidBody implements Updateable {
      * @param alive True to set the body to alive, false for not alive
      */
     public void setAlive(boolean alive) {
+        if(getGameObject() == null) return;
         this.alive = alive;
     }
 }

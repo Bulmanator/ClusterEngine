@@ -23,8 +23,8 @@
 */
 package com.cluster.engine.Physics.Shapes;
 
-import com.cluster.engine.Utilities.MUtil;
-import com.cluster.engine.Utilities.VUtil;
+import com.cluster.engine.Utilities.Maths.MUtil;
+import com.cluster.engine.Utilities.Maths.VUtil;
 import org.jsfml.graphics.ConvexShape;
 import org.jsfml.graphics.Drawable;
 import org.jsfml.system.Vector2f;

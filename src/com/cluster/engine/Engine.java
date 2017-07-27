@@ -24,20 +24,21 @@
 
 package com.cluster.engine;
 
+import com.cluster.engine.Components.GameObjectManager;
 import com.cluster.engine.Input.InputHandler;
 import com.cluster.engine.Input.InputProcessor;
+import com.cluster.engine.Physics.World;
 import com.cluster.engine.Utilities.EngineConfig;
 import com.cluster.engine.Utilities.Interfaces.Disposable;
 import com.cluster.engine.Utilities.Interfaces.Renderable;
 import com.cluster.engine.Utilities.Interfaces.Updateable;
-import com.cluster.engine.Utilities.MUtil;
+import com.cluster.engine.Utilities.Maths.MUtil;
 import org.jsfml.JSFML;
 import org.jsfml.graphics.RenderWindow;
 import org.jsfml.internal.JSFMLError;
 import org.jsfml.system.Clock;
 import org.jsfml.system.Vector2i;
 import org.jsfml.window.ContextSettings;
-import org.jsfml.window.Mouse;
 import org.jsfml.window.VideoMode;
 import org.jsfml.window.WindowStyle;
 import org.jsfml.window.event.Event;
@@ -53,6 +54,8 @@ import java.io.UncheckedIOException;
  * @author James Bulman
  */
 public class Engine implements Updateable, Renderable, Disposable {
+
+    public static boolean DEBUG = true;
 
     /** The Name of the operating system */
     public static final String OS_NAME = System.getProperty("os.name").toLowerCase();
@@ -71,6 +74,12 @@ public class Engine implements Updateable, Renderable, Disposable {
     private Game game;
     // The constant Game time, in seconds
     private float deltaTime;
+
+    // Game Object manager to create game objects
+    private GameObjectManager objectManager;
+
+    // The world for physics
+    private World world;
 
     // Whether or not the Engine has been disposed
     private boolean isDisposed;
@@ -131,6 +140,9 @@ public class Engine implements Updateable, Renderable, Disposable {
         // Set content directory
         setContentDir(config.contentRoot);
 
+        objectManager = new GameObjectManager();
+        world = new World();
+
         // Initialises the Game
         this.game = game;
         game.setEngine(this);
@@ -151,9 +163,6 @@ public class Engine implements Updateable, Renderable, Disposable {
         // Starts a clock to see how much time has passed
         float accumulator = 0;
         Clock clock = new Clock();
-
-        boolean controllerMoved = false;
-
         // Begins the Main loop
         while (!shouldClose) {
 
@@ -196,16 +205,11 @@ public class Engine implements Updateable, Renderable, Disposable {
                         input.mouseWheelMoved(event.asMouseWheelEvent().delta);
                         break;
                     case MOUSE_MOVED:
-                        if(!Mouse.getPosition().equals(window.getPosition())) {
-                            controllerMoved = false;
-                        }
                         input.mouseMoved(event.asMouseEvent().position);
                         break;
 
                     // Controller events
                     case JOYSTICK_BUTTON_PRESSED:
-                        controllerMoved = true;
-                        Mouse.setPosition(window.getPosition());
                         JoystickButtonEvent jsButtonEvent = event.asJoystickButtonEvent();
                         input.controllerButtonPressed(jsButtonEvent.joystickId, jsButtonEvent.button);
                         break;
@@ -214,8 +218,6 @@ public class Engine implements Updateable, Renderable, Disposable {
                         input.controllerButtonReleased(jsButtonEvent.joystickId, jsButtonEvent.button);
                         break;
                     case JOYSTICK_MOVED:
-                        controllerMoved = true;
-                        Mouse.setPosition(window.getPosition());
                         JoystickMoveEvent jsMoveEvent = event.asJoystickMoveEvent();
                         input.controllerAxisMoved(jsMoveEvent.joystickId,
                                 jsMoveEvent.joyAxis, jsMoveEvent.position);
@@ -234,7 +236,7 @@ public class Engine implements Updateable, Renderable, Disposable {
             accumulator += elapsed;
             clock.restart();
 
-            fps = Math.round(1 / elapsed);
+            fps = (int) (1.f / elapsed);
 
             // Clamps the accumulator
             accumulator = MUtil.clamp(accumulator, 0, 0.2f);
@@ -248,8 +250,6 @@ public class Engine implements Updateable, Renderable, Disposable {
 
             // Render the game
             render();
-
-            window.setMouseCursorVisible(!controllerMoved);
         }
 
         dispose();
@@ -262,6 +262,8 @@ public class Engine implements Updateable, Renderable, Disposable {
     public void update(float dt) {
         if(isDisposed) throw new IllegalStateException("Error: The game instance has been disposed and therefore cannot be updated");
         game.update(dt);
+        objectManager.update(deltaTime);
+        world.update(deltaTime);
     }
 
     /**
@@ -270,6 +272,8 @@ public class Engine implements Updateable, Renderable, Disposable {
     public void render() {
         if(isDisposed) throw new IllegalStateException("Error: The game instance has been disposed and therefore cannot be rendered");
         game.render();
+        if(DEBUG) world.render(window);
+        objectManager.render(window);
         window.display();
     }
 
@@ -326,6 +330,18 @@ public class Engine implements Updateable, Renderable, Disposable {
      * @return The Input Handler in use
      */
     public InputProcessor  getInputHandler() { return input; }
+
+    /**
+     * Gets the Game Object manager used to create game objects
+     * @return The Game Object manager
+     */
+    public GameObjectManager getObjectManager() { return objectManager; }
+
+    /**
+     * Gets the physics world instance for the engine
+     * @return The physics world
+     */
+    public World getWorld() { return world; }
 
     /**
      * Changes the {@link InputProcessor} to the one specified

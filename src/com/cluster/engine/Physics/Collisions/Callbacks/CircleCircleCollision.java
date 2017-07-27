@@ -23,12 +23,12 @@
 */
 package com.cluster.engine.Physics.Collisions.Callbacks;
 
+import com.cluster.engine.Components.Transform;
 import com.cluster.engine.Physics.Collisions.Manifold;
 import com.cluster.engine.Physics.Shapes.Circle;
 import com.cluster.engine.Physics.Shapes.Shape;
-import com.cluster.engine.Physics.Transform;
-import com.cluster.engine.Utilities.MUtil;
-import com.cluster.engine.Utilities.VUtil;
+import com.cluster.engine.Utilities.Maths.MUtil;
+import com.cluster.engine.Utilities.Maths.VUtil;
 import org.jsfml.system.Vector2f;
 
 class CircleCircleCollision implements CollisionHandler {

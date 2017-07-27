@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-package com.cluster.engine.Utilities;
+package com.cluster.engine.Utilities.Maths;
 
 import org.jsfml.graphics.Color;
 

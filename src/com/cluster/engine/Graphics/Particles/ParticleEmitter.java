@@ -24,15 +24,15 @@
 
 package com.cluster.engine.Graphics.Particles;
 
-import com.cluster.engine.Utilities.Interfaces.EntityRenderable;
-import com.cluster.engine.Utilities.Interfaces.Updateable;
+import com.cluster.engine.Components.Component;
 import org.jsfml.graphics.RenderWindow;
+import org.jsfml.system.Vector2f;
 
 /**
  * A class which will emit a given particles from a given configuration at the rate specified
  * @author James Bulman
  */
-public class ParticleEmitter implements Updateable, EntityRenderable {
+public class ParticleEmitter extends Component {
 
     /** Whether the emitter is active or not */
     private boolean active;
@@ -58,7 +58,9 @@ public class ParticleEmitter implements Updateable, EntityRenderable {
      * @param emissionRate The emission rate of the emitter, in particles per second
      * @param maxParticles The max particles which can be active at once
      */
-    public ParticleEmitter(ParticleConfig defaultConfig, float emissionRate, int maxParticles) {
+    public ParticleEmitter(String name, ParticleConfig defaultConfig, float emissionRate, int maxParticles) {
+        super(name);
+
         // Initialise the particle pool
         particlePool = new Particle[maxParticles];
         for(int i = 0; i < maxParticles; i++) {
@@ -85,6 +87,7 @@ public class ParticleEmitter implements Updateable, EntityRenderable {
      */
     public void update(float dt) {
         if((!active && particleCount == 0) || pause) return;
+        else if(getGameObject() == null) return;
 
         // Work out the particles per second
         float rate = 1f / emissionRate;
@@ -131,7 +134,10 @@ public class ParticleEmitter implements Updateable, EntityRenderable {
         if(particleCount == particlePool.length) return;
 
         Particle p = particlePool[particleCount];
-        p.initialise(config);
+
+        Vector2f position = Vector2f.add(config.offset,
+                getGameObject().getTransform().getPosition());
+        p.initialise(config, position);
 
         particleCount++;
     }
@@ -176,7 +182,8 @@ public class ParticleEmitter implements Updateable, EntityRenderable {
      * @param active True for the emitter to be active, False for the emitter to be inactive
      */
     public void setActive(boolean active) {
-        if(!active) accumulator = 0;
+        if(getGameObject() == null) return;
+        accumulator = 0;
         this.active = active;
     }
 
@@ -187,6 +194,14 @@ public class ParticleEmitter implements Updateable, EntityRenderable {
     public void setPause(boolean pause) {
         if(pause) accumulator = 0;
         this.pause = pause;
+    }
+
+    /**
+     * Returns the {@link Type#ParticleEmitter} type
+     * @return The particle emitter type
+     */
+    public Type getType() {
+        return Type.ParticleEmitter;
     }
 
     /**

@@ -33,8 +33,8 @@ import org.jsfml.system.Vector2f;
  */
 public class ParticleConfig {
 
-    /** The starting position of the particle, default = (0, 0) */
-    public Vector2f position;
+    /** The offset from the GameObject it is attached to, default = (0, 0) */
+    public Vector2f offset;
     /** The speed of the particle, default = 0 */
     public float speed;
     /** The minimum angle to generate between, in degrees, default = 0 */
@@ -70,7 +70,7 @@ public class ParticleConfig {
      */
     public ParticleConfig() {
         // Positional
-        position = new Vector2f(0, 0);
+        offset = new Vector2f(0, 0);
         speed = 0;
         minAngle = 0;
         maxAngle = 0;
@@ -100,7 +100,7 @@ public class ParticleConfig {
      */
     ParticleConfig(ParticleConfig config) {
         // Positional
-        position = new Vector2f(config.position.x, config.position.y);
+        offset = new Vector2f(config.offset.x, config.offset.y);
         speed = config.speed;
         minAngle = config.minAngle;
         maxAngle = config.maxAngle;

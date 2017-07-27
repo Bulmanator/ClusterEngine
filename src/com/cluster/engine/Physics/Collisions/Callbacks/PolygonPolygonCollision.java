@@ -23,12 +23,12 @@
 */
 package com.cluster.engine.Physics.Collisions.Callbacks;
 
+import com.cluster.engine.Components.Transform;
 import com.cluster.engine.Physics.Collisions.Manifold;
 import com.cluster.engine.Physics.Shapes.Polygon;
 import com.cluster.engine.Physics.Shapes.Shape;
-import com.cluster.engine.Physics.Transform;
-import com.cluster.engine.Utilities.MUtil;
-import com.cluster.engine.Utilities.VUtil;
+import com.cluster.engine.Utilities.Maths.MUtil;
+import com.cluster.engine.Utilities.Maths.VUtil;
 import org.jsfml.system.Vector2f;
 
 class PolygonPolygonCollision implements CollisionHandler {
@@ -82,19 +82,16 @@ class PolygonPolygonCollision implements CollisionHandler {
         Transform txA = manifold.a.getTransform();
         Transform txB = manifold.b.getTransform();
 
-        Simplex simplex = new Simplex();
+        //Transform txA = manifold.txA;
+        //Transform txB = manifold.txB;
 
+        Simplex simplex = new Simplex();
         simplex.direction = Vector2f.sub(txB.getPosition(), txA.getPosition());
 
-
-        Vector2f pA = support(polygonA,
-                txA.applyRotation(simplex.direction));
-
+        Vector2f pA = support(polygonA, txA.getRotation().applyInverse(simplex.direction));
         pA = txA.apply(pA);
 
-        Vector2f pB = support(polygonB,
-                txB.applyRotation(Vector2f.neg(simplex.direction)));
-
+        Vector2f pB = support(polygonB, txB.getRotation().applyInverse(Vector2f.neg(simplex.direction)));
         pB = txB.apply(pB);
 
         simplex.vertices[simplex.vertexCount] = Vector2f.sub(pA, pB);
@@ -112,10 +109,10 @@ class PolygonPolygonCollision implements CollisionHandler {
         simplex.direction = Vector2f.neg(simplex.direction);
 
         for(int iter = 0; iter < MAX_ITERATIONS; iter++) {
-            pA = support(polygonA, txA.applyRotation(simplex.direction));
+            pA = support(polygonA, txA.getRotation().applyInverse(simplex.direction));
             pA = txA.apply(pA);
 
-            pB = support(polygonB, txB.applyRotation(Vector2f.neg(simplex.direction)));
+            pB = support(polygonB, txB.getRotation().applyInverse(Vector2f.neg(simplex.direction)));
             pB = txB.apply(pB);
 
             simplex.vertices[simplex.vertexCount] = Vector2f.sub(pA, pB);
@@ -249,6 +246,9 @@ class PolygonPolygonCollision implements CollisionHandler {
         Transform txA = manifold.a.getTransform();
         Transform txB = manifold.b.getTransform();
 
+        //Transform txA = manifold.txA;
+        //Transform txB = manifold.txB;
+
         for(int iter = 0; iter < MAX_ITERATIONS; iter++) {
 
             Edge edge = getClosestEdge(simplex);
@@ -257,10 +257,10 @@ class PolygonPolygonCollision implements CollisionHandler {
                 return;
             }
 
-            Vector2f pA = support(a, edge.normal);
+            Vector2f pA = support(a, txA.getRotation().applyInverse(edge.normal));
             pA = txA.apply(pA);
 
-            Vector2f pB = support(b, Vector2f.neg(edge.normal));
+            Vector2f pB = support(b, txB.getRotation().applyInverse(Vector2f.neg(edge.normal)));
             pB = txB.apply(pB);
 
             Vector2f p = Vector2f.sub(pA, pB);

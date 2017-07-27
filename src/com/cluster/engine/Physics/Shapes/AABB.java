@@ -24,7 +24,7 @@
 
 package com.cluster.engine.Physics.Shapes;
 
-import com.cluster.engine.Physics.Transform;
+import com.cluster.engine.Components.Transform;
 import org.jsfml.system.Vector2f;
 
 /**
@@ -44,41 +44,42 @@ public class AABB {
      * Finds the minimum and maximum bounds of the given vertices and creates an AABB using them
      * @param vertices The vertices to create the AABB from
      */
-    public AABB(Vector2f[] vertices, int count) {
+    public AABB(Polygon a, Transform tx) {
         float minX, maxX;
         float minY, maxY;
 
+        Vector2f[] vertices = a.getVertices();
+        int count = a.getVertexCount();
+
+        Vector2f current = tx.apply(vertices[0]);
+
         // Initial Values
-        minX = maxX = vertices[0].x;
-        minY = maxY = vertices[0].y;
+        minX = maxX = current.x;
+        minY = maxY = current.y;
 
         for(int i = 1; i < count; i++) {
+            current = tx.apply(vertices[i]);
+
             // Find min and max x values
-            if(vertices[i].x < minX) {
-                minX = vertices[i].x;
+            if(current.x < minX) {
+                minX = current.x;
             }
-            else if(vertices[i].x > maxX) {
-                maxX = vertices[i].x;
+            else if(current.x > maxX) {
+                maxX = current.x;
             }
 
             // Find min and max y values
-            if(vertices[i].y < minY) {
-                minY = vertices[i].y;
+            if(current.y < minY) {
+                minY = current.y;
             }
-            else if(vertices[i].y > maxY) {
-                maxY = vertices[i].y;
+            else if(current.y > maxY) {
+                maxY = current.y;
             }
         }
 
-        // Find the centre
+        // Set the minimum and maximum
         minimum = new Vector2f(minX, minY);
-        // Find the half width and height
         maximum = new Vector2f(maxX,maxY);
-    }
-
-    public void transform(Transform tx) {
-        minimum = tx.applyPosition(minimum);
-        maximum = tx.applyPosition(maximum);
     }
 
     /**
