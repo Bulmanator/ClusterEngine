@@ -10,7 +10,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/Libraries/jsfml.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Aerolites/Libraries/jsfml.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
